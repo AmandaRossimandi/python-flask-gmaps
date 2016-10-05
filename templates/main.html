@@ -3,83 +3,6 @@
 <head>
   <title>Main map</title>
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ google_key }}&libraries=geometry"></script>
-  <script type="text/javascript">
-
-  var markers = [];
-  var paths = [];
-  function initMap() {
-    var map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: -7.3632438, lng: 110.5155871},
-      zoom: 15
-    });
-
-    google.maps.event.addListener(map, 'click', function(event) {
-      placeMarker(event.latLng, map);
-    });
-  }
-
-  function placeMarker(position, map) {
-    var marker = new google.maps.Marker({
-      position: position,
-      map: map
-    });
-
-    var lastMarker = markers.slice(-1).pop();
-    markers.push(marker);
-    // map.panTo(position);
-
-    addRoute(lastMarker, marker, map);
-  }
-
-  function clearMarkers() {
-    for(var key in markers) {
-      markers[key].setMap(null);
-    }
-    markers = [];
-  }
-
-  function clearPaths() {
-    for(var key in paths) {
-      paths[key].setMap(null);
-    }
-    paths = [];
-  }
-
-  function clearAll() {
-    clearMarkers();
-    clearPaths();
-  }
-
-  function addRoute(markerBegin, markerEnd, map) {
-    if(null == markerBegin || null == markerEnd) return;
-    var begin = markerBegin.position.lat()+','+markerBegin.position.lng();
-    var end = markerEnd.position.lat()+','+markerEnd.position.lng();
-
-    $.ajax({
-      type: "GET",
-      url: "{{ url_for('directions') }}",
-      data: {
-        begin: begin,
-        end: end,
-      },
-      success: function(data) {
-        var newPath = new google.maps.Polyline({
-          path: google.maps.geometry.encoding.decodePath(data),
-          geodesic: true,
-          strokeColor: "#FF0000",
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-
-        newPath.setMap(map);
-        paths.push(newPath);
-        $('#result').text(JSON.stringify(data));
-      }
-    });
-
-  }
-
-  </script>
 </head>
 <body onload="initMap()">
   <h1>This is the page for main map</h1>
@@ -87,9 +10,11 @@
   <div id="map" style="width:100%; height:500px;"></div>
 
   <div id="result"></div>
+  <div id="direction" style="display:none">{{ url_for('directions') }}</div>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="{{
     url_for('static', filename='jquery-3.1.1.min.js') }}">\x3C/script>')</script>
+  <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
