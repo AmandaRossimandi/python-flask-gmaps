@@ -1,0 +1,13 @@
+__pycache__/
+
+# virtualenv folders for windows
+Include/
+Lib/
+Scripts/
+
+# virtualenv folders for linux
+include/
+bin/
+lib/
+
+keys.py
