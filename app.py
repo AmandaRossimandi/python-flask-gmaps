@@ -1,9 +1,11 @@
 from flask import Flask, render_template, jsonify, request
+from flask.ext.runner import Runner
 from keys import google_key
 from direction import get_direction
 from weather import get_weather
 
 app = Flask(__name__)
+runner = Runner(app)
 
 @app.route("/")
 def index():
@@ -27,4 +29,5 @@ def weather():
     return jsonify(get_weather(lat, lng))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    #app.run(debug=True)
+    runner.run()
