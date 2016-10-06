@@ -1,6 +1,9 @@
 var markers = [];
 var paths = [];
+var pathDistances = [];
+var markerInfo = [];
 var direction_url = document.getElementById('direction').innerHTML;
+var weather_url = document.getElementById('weather').innerHTML;
 function initMap() {
   var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -7.3632438, lng: 110.5155871},
@@ -20,7 +23,22 @@ function placeMarker(position, map) {
 
   var lastMarker = markers.slice(-1).pop();
   markers.push(marker);
-  // map.panTo(position);
+
+  // get weather information
+  $.ajax({
+    type: "GET",
+    url: weather_url,
+    data: {
+      lat: position.lat,
+      lng: position.lng,
+    },
+    success: function(data) {
+      markerInfo.push(data);
+
+      updateInfo();
+      // $('#result').text(JSON.stringify(data));
+    }
+  });
 
   addRoute(lastMarker, marker, map, direction_url);
 }
@@ -30,6 +48,7 @@ function clearMarkers() {
     markers[key].setMap(null);
   }
   markers = [];
+  markerInfo = [];
 }
 
 function clearPaths() {
@@ -37,11 +56,14 @@ function clearPaths() {
     paths[key].setMap(null);
   }
   paths = [];
+  pathDistances = [];
 }
 
 function clearAll() {
   clearMarkers();
   clearPaths();
+  updateDistance();
+  updateInfo();
 }
 
 function addRoute(markerBegin, markerEnd, map, url) {
@@ -58,7 +80,7 @@ function addRoute(markerBegin, markerEnd, map, url) {
     },
     success: function(data) {
       var newPath = new google.maps.Polyline({
-        path: google.maps.geometry.encoding.decodePath(data),
+        path: google.maps.geometry.encoding.decodePath(data.points),
         geodesic: true,
         strokeColor: "#FF0000",
         strokeOpacity: 1.0,
@@ -67,7 +89,41 @@ function addRoute(markerBegin, markerEnd, map, url) {
 
       newPath.setMap(map);
       paths.push(newPath);
+      pathDistances.push(data.distance.value);
+
+      updateDistance();
       // $('#result').text(JSON.stringify(data));
     }
   });
+}
+
+function updateDistance() {
+  var result = 0;
+  for(var key in pathDistances) {
+    result += pathDistances[key];
+  }
+
+  document.getElementById('distance-label').innerHTML = result;
+}
+
+function getWeather() {
+
+}
+
+function updateInfo() {
+  var result = '';
+  if(markerInfo.length > 0) {
+    for(var key in markerInfo) {
+      result += '<tr>';
+      var info = markerInfo[key];
+      result += '<td>'+info.coord.lat+', '+info.coord.lon+'</td>';
+      result += '<td>'+info.main.temp+' C</td>';
+      result += '<td>'+info.main.humidity+'%</td>';
+      result += '<td>'+info.weather[0].main+'</td>';
+      result += '<td>'+info.wind.speed+' m/s</td>';
+      result += '<td>'+info.wind.deg+'</td>';
+      result += '</tr>';
+    }
+  }
+  document.getElementById('point-info-tbody').innerHTML = result;
 }
