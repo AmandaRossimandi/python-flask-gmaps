@@ -4,10 +4,12 @@ var pathDistances = [];
 var markerInfo = [];
 var direction_url = document.getElementById('direction').innerHTML;
 var weather_url = document.getElementById('weather').innerHTML;
+var search_url = document.getElementById('search').innerHTML;
+var map;
 function initMap() {
-  var map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -7.3632438, lng: 110.5155871},
-    zoom: 15
+    zoom: 8
   });
 
   google.maps.event.addListener(map, 'click', function(event) {
@@ -126,4 +128,23 @@ function updateInfo() {
     }
   }
   document.getElementById('point-info-tbody').innerHTML = result;
+}
+
+function searchLocation(location) {
+  clearAll();
+  
+  $.ajax({
+    type: "GET",
+    url: search_url,
+    data: {
+      location: location
+    },
+    success: function(data) {
+      if(data) {
+        var point = new google.maps.LatLng(data.lat, data.lng);
+        map.panTo(point);
+      }
+      // $('#result').text(JSON.stringify(data));
+    }
+  });
 }

@@ -1,11 +1,12 @@
 from flask import Flask, render_template, jsonify, request
-from flask.ext.runner import Runner
+# from flask.ext.runner import Runner
 from keys import google_key
 from direction import get_direction
 from weather import get_weather
+from search_location import get_place_location
 
 app = Flask(__name__)
-runner = Runner(app)
+# runner = Runner(app)
 
 @app.route("/")
 def index():
@@ -25,9 +26,13 @@ def directions():
 def weather():
     lat = request.args.get('lat', type=str)
     lng = request.args.get('lng', type=str)
-    print(type(get_weather(lat, lng)))
     return jsonify(get_weather(lat, lng))
 
+@app.route("/search", methods=['GET'])
+def search():
+    location = request.args.get('location', type=str)
+    return jsonify(get_place_location(location))
+
 if __name__ == "__main__":
-    #app.run(debug=True)
-    runner.run()
+    app.run()
+    # runner.run()

@@ -22,7 +22,7 @@ def get_direction(pos1, pos2):
     gmaps = googlemaps.Client(key=google_key)
     now = datetime.now()
 
-    directions_result = gmaps.directions(pos1, pos2)
+    directions_result = gmaps.directions(pos1, pos2, mode="walking")
     result = {
         "points": directions_result[0]["overview_polyline"]["points"],
         "distance": directions_result[0]["legs"][0]["distance"]
