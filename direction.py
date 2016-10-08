@@ -3,6 +3,7 @@
 from keys import google_key
 import googlemaps
 from datetime import datetime
+import math
 
 '''
 get_direction function
@@ -23,9 +24,39 @@ def get_direction(pos1, pos2):
     now = datetime.now()
 
     directions_result = gmaps.directions(pos1, pos2, mode="walking")
-    result = {
-        "points": directions_result[0]["overview_polyline"]["points"],
-        "distance": directions_result[0]["legs"][0]["distance"]
+
+    pos1_latlng = {
+        "lat": float(pos1.split(',')[0]),
+        "lng": float(pos1.split(',')[1])
     }
 
+    pos2_latlng = {
+        "lat": float(pos2.split(',')[0]),
+        "lng": float(pos2.split(',')[1])
+    }
+
+    result = {
+        "begin": pos1_latlng,
+        "end": pos2_latlng,
+        "distance": {"value": calculate_distance(pos1_latlng, pos2_latlng)},
+        "result": directions_result
+    }
+
+    if len(directions_result) > 0:
+        result = {
+            "points": directions_result[0]["overview_polyline"]["points"],
+            "distance": directions_result[0]["legs"][0]["distance"],
+            "result": directions_result
+        }
+
     return result
+
+def calculate_distance(pos1, pos2):
+    dlng = math.radians(pos2["lng"]-pos1["lng"])
+    dlat = math.radians(pos2["lat"]-pos1["lat"])
+    R = 6373000
+    a = (math.sin(dlat/2))**2 + math.cos(math.radians(pos1["lat"])) * math.cos(math.radians(pos2["lat"])) * (math.sin(dlng/2))**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = R * c
+
+    return int(d)

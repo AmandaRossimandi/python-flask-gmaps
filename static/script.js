@@ -81,8 +81,18 @@ function addRoute(markerBegin, markerEnd, map, url) {
       end: end,
     },
     success: function(data) {
+      console.log(data.result);
+      var points = []
+      if(data.points != null) {
+        points = google.maps.geometry.encoding.decodePath(data.points);
+      } else {
+        points = [
+          data.begin,
+          data.end
+        ]
+      }
       var newPath = new google.maps.Polyline({
-        path: google.maps.geometry.encoding.decodePath(data.points),
+        path: points,
         geodesic: true,
         strokeColor: "#FF0000",
         strokeOpacity: 1.0,
@@ -130,9 +140,12 @@ function updateInfo() {
   document.getElementById('point-info-tbody').innerHTML = result;
 }
 
-function searchLocation(location) {
+function searchLocation(location, elmt) {
   clearAll();
-  
+
+  $('.provinsi').removeClass('provinsi-selected');
+  $(elmt).addClass('provinsi-selected');
+
   $.ajax({
     type: "GET",
     url: search_url,
@@ -144,7 +157,12 @@ function searchLocation(location) {
         var point = new google.maps.LatLng(data.lat, data.lng);
         map.panTo(point);
       }
+      updateProvInfo($(elmt).attr("id"), location);
       // $('#result').text(JSON.stringify(data));
     }
   });
+}
+
+function updateProvInfo(code, name) {
+  $("#provinsi-title").html(name);
 }
